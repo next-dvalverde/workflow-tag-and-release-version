@@ -1,0 +1,33 @@
+name: 🏷️ Create Tag and Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  get-version:
+    name: ⚙️ Get Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.VERSION }}
+
+    steps:
+      - name: 🔽 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Get the current version
+        id: get_version
+        run: |
+          VERSION=$(cat VERSION.txt)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+  tag-release:
+    name: 🏷️ Tag and Release v${{ needs.get-version.outputs.version }}
+    needs: get-version
+    uses: next-dvalverde/workflow-tag-and-release-version/.github/workflows/tag-and-release.yml@main
+    with:
+      version: ${{ needs.get-version.outputs.version }}
